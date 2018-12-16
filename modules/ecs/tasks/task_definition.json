@@ -1,0 +1,23 @@
+[
+  {
+    "name": "${container_name}",
+    "image": "${image}",
+    "portMappings": [
+      {
+        "containerPort": 8080,
+        "hostPort": 8080
+      }
+    ],
+    "memory": 300,
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "${container_name}"
+      }
+    }
+  }
+]
+

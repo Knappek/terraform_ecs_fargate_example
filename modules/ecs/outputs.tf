@@ -1,5 +1,5 @@
 output "repository_url" {
-  value = "${aws_ecr_repository.openjobs_app.repository_url}"
+  value = "${aws_ecr_repository.docker.repository_url}"
 }
 
 output "cluster_name" {
@@ -7,17 +7,17 @@ output "cluster_name" {
 }
 
 output "service_name" {
-  value = "${aws_ecs_service.web.name}"
-}
-
-output "alb_dns_name" {
-  value = "${aws_alb.alb_openjobs.dns_name}"
+  value = "${aws_ecs_service.service.name}"
 }
 
 output "alb_zone_id" {
-  value = "${aws_alb.alb_openjobs.zone_id}"
+  value = "${aws_alb.alb.zone_id}"
 }
 
 output "security_group_id" {
   value = "${aws_security_group.ecs_service.id}"
+}
+
+output "alb_dns_name" {
+  value = "${aws_alb.alb.dns_name}"
 }

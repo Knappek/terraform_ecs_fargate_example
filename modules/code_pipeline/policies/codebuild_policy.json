@@ -15,9 +15,7 @@
         "ecr:UploadLayerPart",
         "ecr:CompleteLayerUpload",
         "ecr:BatchCheckLayerAvailability",
-        "ecr:PutImage",
-        "ecs:RunTask",
-        "iam:PassRole"
+        "ecr:PutImage"
       ]
     },
     {

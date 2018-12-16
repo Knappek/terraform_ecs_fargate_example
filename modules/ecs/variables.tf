@@ -1,5 +1,9 @@
-variable "environment" {
-  description = "The environment"
+variable "service_name" {
+  description = "Name of the application"
+}
+
+variable "cluster_name" {
+  description = "Name of the Fargate cluster"
 }
 
 variable "vpc_id" {
@@ -26,26 +30,11 @@ variable "public_subnet_ids" {
   description = "The private subnets to use"
 }
 
-variable "database_endpoint" {
-  description = "The database endpoint"
-}
-
-variable "database_username" {
-  description = "The database username"
-}
-
-variable "database_password" {
-  description = "The database password"
-}
-
-variable "database_name" {
-  description = "The database that the app will use"
-}
-
 variable "repository_name" {
   description = "The name of the repisitory"
 }
 
-variable "secret_key_base" {
-  description = "The secret key base to use in the app"
+variable "tags" {
+  type        = "map"
+  default     = {}
 }

@@ -1,7 +1,8 @@
 resource "aws_s3_bucket" "source" {
-  bucket        = "openjobs-experiment-source"
+  bucket        = "${var.ecs_service_name}-source"
   acl           = "private"
   force_destroy = true
+  tags = "${var.tags}"
 }
 
 resource "aws_iam_role" "codepipeline_role" {
@@ -47,21 +48,21 @@ resource "aws_iam_role_policy" "codebuild_policy" {
   policy      = "${data.template_file.codebuild_policy.rendered}"
 }
 
+data "aws_region" "current" {}
+
 data "template_file" "buildspec" {
   template = "${file("${path.module}/buildspec.yml")}"
 
   vars {
-    repository_url     = "${var.repository_url}"
-    region             = "${var.region}"
-    cluster_name       = "${var.ecs_cluster_name}"
-    subnet_id          = "${var.run_task_subnet_id}"
-    security_group_ids = "${join(",", var.run_task_security_group_ids)}"
+    repository_url = "${var.repository_url}"
+    ecs_service_name = "${var.ecs_service_name}"
+    region         = "${data.aws_region.current.name}"
   }
 }
 
 
-resource "aws_codebuild_project" "openjobs_build" {
-  name          = "openjobs-codebuild"
+resource "aws_codebuild_project" "spring_boot_example_build" {
+  name          = "${var.ecs_service_name}-codebuild"
   build_timeout = "10"
   service_role  = "${aws_iam_role.codebuild_role.arn}"
 
@@ -72,7 +73,7 @@ resource "aws_codebuild_project" "openjobs_build" {
   environment {
     compute_type    = "BUILD_GENERAL1_SMALL"
     // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html
-    image           = "aws/codebuild/docker:1.12.1"
+    image           = "aws/codebuild/docker:18.09.0"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
   }
@@ -81,12 +82,14 @@ resource "aws_codebuild_project" "openjobs_build" {
     type      = "CODEPIPELINE"
     buildspec = "${data.template_file.buildspec.rendered}"
   }
+
+  tags = "${var.tags}"
 }
 
 /* CodePipeline */
 
 resource "aws_codepipeline" "pipeline" {
-  name     = "openjobs-pipeline"
+  name     = "${var.ecs_service_name}-pipeline"
   role_arn = "${aws_iam_role.codepipeline_role.arn}"
 
   artifact_store {
@@ -106,8 +109,8 @@ resource "aws_codepipeline" "pipeline" {
       output_artifacts = ["source"]
 
       configuration {
-        Owner      = "duduribeiro"
-        Repo       = "openjobs_experiment"
+        Owner      = "${var.github_owner}"
+        Repo       = "${var.github_repo}"
         Branch     = "master"
       }
     }
@@ -126,13 +129,13 @@ resource "aws_codepipeline" "pipeline" {
       output_artifacts = ["imagedefinitions"]
 
       configuration {
-        ProjectName = "openjobs-codebuild"
+        ProjectName = "${var.ecs_service_name}-codebuild"
       }
     }
   }
 
   stage {
-    name = "Production"
+    name = "Deploy"
 
     action {
       name            = "Deploy"

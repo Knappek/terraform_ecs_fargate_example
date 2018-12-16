@@ -7,8 +7,8 @@ resource "aws_s3_bucket" "source" {
 
 resource "aws_iam_role" "codepipeline_role" {
   name               = "codepipeline-role"
-
   assume_role_policy = "${file("${path.module}/policies/codepipeline_role.json")}"
+  tags = "${var.tags}"
 }
 
 /* policies */
@@ -32,6 +32,7 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
 resource "aws_iam_role" "codebuild_role" {
   name               = "codebuild-role"
   assume_role_policy = "${file("${path.module}/policies/codebuild_role.json")}"
+  tags = "${var.tags}"
 }
 
 data "template_file" "codebuild_policy" {
